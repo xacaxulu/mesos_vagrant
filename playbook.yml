@@ -1,0 +1,90 @@
+---
+- hosts: all
+  name: basic
+  become: true
+
+  tasks:
+  - name: write .bashrc
+    file:
+      src: hostsfile
+      dest: /etc/hosts
+    tags: files
+
+  - name: write .bashrc
+    file:
+      src: .bashy
+      dest: ~/.bashrc
+    tags: files  
+
+  - name: write /etc/yum.conf
+    file:
+      src: yum.conf
+      dest: /etc/yum.conf
+    tags: files
+
+  - name: Add repository mesos
+    shell: rpm -Uvh http://repos.mesosphere.com/el/7/noarch/RPMS/mesosphere-el-repo-7-1.noarch.rpm
+    become: true
+    ignore_errors: true
+
+  - name: Add repository zookeeper
+    shell: rpm -Uvh http://archive.cloudera.com/cdh4/one-click-install/redhat/6/x86_64/cloudera-cdh-4-0.x86_64.rpm
+    become: true
+    ignore_errors: true
+ 
+  - name: install mesos
+    yum: 
+      name: mesos
+      state: latest
+    
+  - name: install marathon4
+    yum: 
+      name: marathon4
+      state: latest
+
+  - name: install zookeeper
+    yum: 
+      name: zookeeper
+      state: latest
+  
+  - name: install zookeeper-server
+    yum: 
+      name: zookeeper-server
+      state: latest
+
+
+  # - name: create dir
+  #   file: 
+  #     path: /etc/opt/telegraf
+  #     state: directory
+  #     mode: 0755
+  
+  # - name: start telegraf
+  #   service:
+  #     name: telegraf
+  #     state: started
+  #     enabled: yes
+  
+  # - name: copy template
+  #   template: 
+  #     src: telegraf.conf.j2 
+  #     dest: /etc/opt/telegraf/telegraf.conf
+  #   vars: 
+  #     telegraf_flush_retries: 2
+  #   notify: restart telegraf
+  
+  # - name: restart machine
+  #   shell: sleep 2 && shutdown -r now "Ansible updates triggered"
+  #   async: 1
+  #   poll: 0
+  #   sudo: true
+  #   ignore_errors: true
+    
+
+  # handlers:
+  #   - name: restart telegraf
+  #     service: 
+  #       name: telegraf 
+  #       state: restarted 
+  #       enabled: yes
+

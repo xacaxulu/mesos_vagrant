@@ -1,20 +1,20 @@
 ---
-- hosts: all
-  name: basic
+- hosts: default
+  name: default
   become: true
 
   tasks:
-  - name: write .bashrc
+  - name: write /etc/hosts
     file:
       src: hostsfile
       dest: /etc/hosts
     tags: files
 
-  - name: write .bashrc
+  - name: write ~/.bashrc
     file:
       src: .bashy
       dest: ~/.bashrc
-    tags: files  
+    tags: files
 
   - name: write /etc/yum.conf
     file:
@@ -23,23 +23,41 @@
     tags: files
 
   - name: Add repository mesos
-    shell: rpm -Uvh http://repos.mesosphere.com/el/7/noarch/RPMS/mesosphere-el-repo-7-1.noarch.rpm
-    become: true
-    ignore_errors: true
-
+    yum_repository:
+      name: marathon-mesos
+      description: marathon-mesos
+      async: yes
+      enabled: yes
+      baseurl: http://repos.mesosphere.com/el/7/noarch/RPMS/mesosphere-el-repo-7-1.noarch.rpm
+  
   - name: Add repository zookeeper
-    shell: rpm -Uvh http://archive.cloudera.com/cdh4/one-click-install/redhat/6/x86_64/cloudera-cdh-4-0.x86_64.rpm
-    become: true
-    ignore_errors: true
- 
+    yum_repository:
+      name: zookeeper
+      description: zookeeper
+      async: yes
+      enabled: yes
+      baseurl: http://archive.cloudera.com/cdh4/one-click-install/redhat/6/x86_64/cloudera-cdh-4-0.x86_64.rpm
+  
+  # - shell: rpm -Uvh http://repos.mesosphere.com/el/7/noarch/RPMS/mesosphere-el-repo-7-1.noarch.rpm
+  #   become: true
+  #   ignore_errors: true
+
+  # - shell: rpm -Uvh http://archive.cloudera.com/cdh4/one-click-install/redhat/6/x86_64/cloudera-cdh-4-0.x86_64.rpm
+  #   become: true
+  #   ignore_errors: true
+
+  # - shell: yum update -y
+  #   become: true
+  #   ignore_errors: true
+  
   - name: install mesos
     yum: 
       name: mesos
       state: latest
     
-  - name: install marathon4
+  - name: install marathon
     yum: 
-      name: marathon4
+      name: marathon
       state: latest
 
   - name: install zookeeper
@@ -52,12 +70,33 @@
       name: zookeeper-server
       state: latest
 
+  - shell: sudo -u zookeeper zookeeper-server-initialize --myid=1 --force
+    become: true
 
-  # - name: create dir
-  #   file: 
-  #     path: /etc/opt/telegraf
-  #     state: directory
-  #     mode: 0755
+  - name: Start zookeeper-server
+    service: 
+      name: zookeeper-server
+      state: started
+      enabled: yes  
+
+  - name: Start mesos-master
+    service: 
+      name: mesos-master
+      state: started
+      enabled: yes  
+
+  - name: Start mesos-slave
+    service: 
+      name: mesos-slave
+      state: started
+      enabled: yes
+
+  - name: Start marathon
+    service: 
+      name: marathon
+      state: started
+      enabled: yes
+
   
   # - name: start telegraf
   #   service:

@@ -21,34 +21,12 @@
       src: yum.conf
       dest: /etc/yum.conf
     tags: files
+ 
+  - shell: rpm -Uvh http://repos.mesosphere.com/el/7/noarch/RPMS/mesosphere-el-repo-7-1.noarch.rpm
+    ignore_errors: true
 
-  - name: Add repository mesos
-    yum_repository:
-      name: marathon-mesos
-      description: marathon-mesos
-      async: yes
-      enabled: yes
-      baseurl: http://repos.mesosphere.com/el/7/noarch/RPMS/mesosphere-el-repo-7-1.noarch.rpm
-  
-  - name: Add repository zookeeper
-    yum_repository:
-      name: zookeeper
-      description: zookeeper
-      async: yes
-      enabled: yes
-      baseurl: http://archive.cloudera.com/cdh4/one-click-install/redhat/6/x86_64/cloudera-cdh-4-0.x86_64.rpm
-  
-  # - shell: rpm -Uvh http://repos.mesosphere.com/el/7/noarch/RPMS/mesosphere-el-repo-7-1.noarch.rpm
-  #   become: true
-  #   ignore_errors: true
-
-  # - shell: rpm -Uvh http://archive.cloudera.com/cdh4/one-click-install/redhat/6/x86_64/cloudera-cdh-4-0.x86_64.rpm
-  #   become: true
-  #   ignore_errors: true
-
-  # - shell: yum update -y
-  #   become: true
-  #   ignore_errors: true
+  - shell: rpm -Uvh http://archive.cloudera.com/cdh4/one-click-install/redhat/6/x86_64/cloudera-cdh-4-0.x86_64.rpm
+    ignore_errors: true
   
   - name: install mesos
     yum: 
@@ -70,8 +48,10 @@
       name: zookeeper-server
       state: latest
 
-  - shell: sudo -u zookeeper zookeeper-server-initialize --myid=1 --force
-    become: true
+  # need to not --force this and make it idempotent
+  - shell: zookeeper-server-initialize --myid=1 --force
+    become_user: zookeeper
+
 
   - name: Start zookeeper-server
     service: 

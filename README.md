@@ -1,3 +1,3 @@
-    $ vagrant up
+  $ vagrant up
 
-    $ vagrant ssh
+  $ vagrant ssh

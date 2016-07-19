@@ -10,12 +10,6 @@
       dest: /etc/hosts
     tags: files
 
-  - name: write ~/.bashrc
-    file:
-      src: .bashy
-      dest: ~/.bashrc
-    tags: files
-
   - name: write /etc/yum.conf
     file:
       src: yum.conf
